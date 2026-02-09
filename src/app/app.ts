@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, NavigationEnd, RouterLink } from '@angular/router';
 import { filter, map, merge, of } from 'rxjs';
@@ -9,6 +9,10 @@ import { stripHttps } from './shared/utils/format.util';
 import type { WindowRegistryConfig } from './core/models/window-config.model';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { FormsModule } from '@angular/forms';
 
 export interface BreadcrumbItem {
   label: string;
@@ -18,7 +22,18 @@ export interface BreadcrumbItem {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, HeaderComponent, FooterComponent, NzBreadCrumbModule, NzIconModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    HeaderComponent,
+    FooterComponent,
+    NzBreadCrumbModule,
+    NzIconModule,
+    NzModalModule,
+    NzInputModule,
+    NzButtonModule,
+    FormsModule,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -30,6 +45,14 @@ export class App implements OnInit {
   /** Filter from state so search is preserved when navigating (breadcrumb, back). */
   protected filter = toSignal(this.state.filter$, { initialValue: '' });
   protected config = computed(() => this.state.getConfig());
+
+  // Multi-registry dialogs state
+  protected addRegistryModalVisible = signal(false);
+  protected changeRegistryModalVisible = signal(false);
+  protected removeRegistryModalVisible = signal(false);
+
+  protected addRegistryUrl = '';
+  protected changeRegistrySelectedUrl = '';
 
   protected breadcrumbItems = toSignal(
     merge(
@@ -74,6 +97,13 @@ export class App implements OnInit {
         dockerRegistryUiTitle: 'Docker Registry UI',
         enableVersionNotification: true,
       });
+    }
+
+    // Initialize local multi-registry list from defaultRegistries when needed
+    const cfgAfter = this.state.getConfig();
+    const existingServers = this.state.getRegistryServers();
+    if (cfgAfter.defaultRegistries.length > 0 && existingServers.length === 0) {
+      this.state.setRegistryServers(cfgAfter.defaultRegistries);
     }
   }
 
@@ -152,14 +182,89 @@ export class App implements OnInit {
   }
 
   protected onMenuAddUrl(): void {
-    // TODO: open add URL modal
+    this.addRegistryUrl = '';
+    this.addRegistryModalVisible.set(true);
   }
 
   protected onMenuChangeUrl(): void {
-    // TODO: open change URL modal
+    const servers = this.state.getRegistryServers();
+    this.changeRegistrySelectedUrl = servers[0] ?? '';
+    this.changeRegistryModalVisible.set(true);
   }
 
   protected onMenuRemoveUrl(): void {
-    // TODO: open remove URL modal
+    this.removeRegistryModalVisible.set(true);
+  }
+
+  protected closeAddRegistryModal(): void {
+    this.addRegistryModalVisible.set(false);
+    this.addRegistryUrl = '';
+  }
+
+  protected closeChangeRegistryModal(): void {
+    this.changeRegistryModalVisible.set(false);
+  }
+
+  protected closeRemoveRegistryModal(): void {
+    this.removeRegistryModalVisible.set(false);
+  }
+
+  protected registryServers(): string[] {
+    return this.state.getRegistryServers();
+  }
+
+  protected isValidRegistryUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const value = String(url).trim();
+    return /^https?:\/\//.test(value) && !/\/v2\/?$/.test(value);
+  }
+
+  protected confirmAddRegistry(): void {
+    if (!this.isValidRegistryUrl(this.addRegistryUrl)) return;
+    const newUrl = this.state.addRegistryServer(this.addRegistryUrl);
+    this.state.setConfig({
+      registryUrl: newUrl,
+      name: stripHttps(newUrl),
+      pullUrl: stripHttps(newUrl),
+    });
+    this.router.navigateByUrl('/');
+    this.closeAddRegistryModal();
+  }
+
+  protected confirmChangeRegistry(): void {
+    if (!this.isValidRegistryUrl(this.changeRegistrySelectedUrl)) return;
+    const newUrl = this.state.addRegistryServer(this.changeRegistrySelectedUrl);
+    this.state.setConfig({
+      registryUrl: newUrl,
+      name: stripHttps(newUrl),
+      pullUrl: stripHttps(newUrl),
+    });
+    this.router.navigateByUrl('/');
+    this.closeChangeRegistryModal();
+  }
+
+  protected onRemoveRegistry(url: string): void {
+    this.state.removeRegistryServer(url);
+    const remaining = this.state.getRegistryServers();
+    const cfg = this.state.getConfig();
+    if (url === cfg.registryUrl) {
+      let nextUrl: string;
+      if (remaining.length > 0) {
+        nextUrl = remaining[0];
+      } else {
+        const base =
+          typeof window !== 'undefined'
+            ? window.location.origin + window.location.pathname.replace(/\/+$/, '')
+            : '';
+        const normalizedBase = base.replace(/\/$/, '').replace(/index(\.html?)?$/i, '');
+        nextUrl = normalizedBase;
+      }
+      this.state.setConfig({
+        registryUrl: nextUrl,
+        name: stripHttps(nextUrl),
+        pullUrl: stripHttps(nextUrl),
+      });
+      this.router.navigateByUrl('/');
+    }
   }
 }

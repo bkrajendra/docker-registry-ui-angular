@@ -12,6 +12,117 @@
     (menuChangeUrl)="onMenuChangeUrl()"
     (menuRemoveUrl)="onMenuRemoveUrl()"
   />
+
+  @if (addRegistryModalVisible()) {
+    <nz-modal
+      [nzVisible]="true"
+      nzTitle="Add registry URL"
+      (nzOnCancel)="closeAddRegistryModal()"
+      [nzClosable]="true"
+      [nzMaskClosable]="false"
+    >
+      <ng-template nzContent>
+        <div class="registry-modal-body">
+          <label for="add-registry-url">Server URL</label>
+          <input
+            id="add-registry-url"
+            nz-input
+            type="text"
+            [(ngModel)]="addRegistryUrl"
+            placeholder="https://registry.example.com"
+          />
+          <p class="hint">Write your URL without /v2</p>
+        </div>
+      </ng-template>
+      <ng-template nzFooter>
+        <button nz-button (click)="closeAddRegistryModal()">Cancel</button>
+        <button
+          nz-button
+          nzType="primary"
+          (click)="confirmAddRegistry()"
+          [disabled]="!isValidRegistryUrl(addRegistryUrl)"
+        >
+          Add
+        </button>
+      </ng-template>
+    </nz-modal>
+  }
+
+  @if (changeRegistryModalVisible()) {
+    <nz-modal
+      [nzVisible]="true"
+      nzTitle="Change registry URL"
+      (nzOnCancel)="closeChangeRegistryModal()"
+      [nzClosable]="true"
+      [nzMaskClosable]="false"
+    >
+      <ng-template nzContent>
+        <div class="registry-modal-body">
+          @if (registryServers().length === 0) {
+            <p>No registry configured. Please add one first.</p>
+          } @else {
+            <label for="change-registry-url">Select registry</label>
+            <select
+              id="change-registry-url"
+              [(ngModel)]="changeRegistrySelectedUrl"
+            >
+              @for (url of registryServers(); track url) {
+                <option [ngValue]="url">{{ url }}</option>
+              }
+            </select>
+          }
+        </div>
+      </ng-template>
+      <ng-template nzFooter>
+        <button nz-button (click)="closeChangeRegistryModal()">Cancel</button>
+        <button
+          nz-button
+          nzType="primary"
+          (click)="confirmChangeRegistry()"
+          [disabled]="!isValidRegistryUrl(changeRegistrySelectedUrl)"
+        >
+          Change
+        </button>
+      </ng-template>
+    </nz-modal>
+  }
+
+  @if (removeRegistryModalVisible()) {
+    <nz-modal
+      [nzVisible]="true"
+      nzTitle="Remove registry URL"
+      (nzOnCancel)="closeRemoveRegistryModal()"
+      [nzClosable]="true"
+      [nzMaskClosable]="false"
+    >
+      <ng-template nzContent>
+        <div class="registry-modal-body">
+          @if (registryServers().length === 0) {
+            <p>No registry to remove.</p>
+          } @else {
+            <ul class="registry-list">
+              @for (url of registryServers(); track url) {
+                <li>
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzDanger
+                    (click)="onRemoveRegistry(url)"
+                  >
+                    <span nz-icon nzType="delete"></span>
+                  </button>
+                  <span class="url">{{ url }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </ng-template>
+      <ng-template nzFooter>
+        <button nz-button (click)="closeRemoveRegistryModal()">Close</button>
+      </ng-template>
+    </nz-modal>
+  }
   <main class="main">
     <nz-breadcrumb class="app-breadcrumb">
       @for (item of breadcrumbItems(); track item.label + (item.link ?? '')) {
