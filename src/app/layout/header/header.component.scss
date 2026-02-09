@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 24px;
+  color: var(--header-text, #fff);
+  background-color: var(--header-background, #25313b);
+
+  .logo {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .search {
+      min-width: 120px;
+      // Always light input with dark text so search is visible in all themes
+      input,
+      input.ant-input,
+      .ant-input-affix-wrapper input {
+        color: #1f2933 !important;
+        background-color: #fff !important;
+        border-color: #d1d5db !important;
+        &::placeholder {
+          color: #6b7280 !important;
+        }
+      }
+    }
+
+    .menu-trigger,
+    .theme-toggle {
+      color: var(--header-text);
+    }
+  }
+}
+
+// Keep search input readable in dark theme (same light box, dark text)
+:host-context(.dark-theme) .app-header .menu .search input,
+:host-context(.dark-theme) .app-header .menu .search .ant-input-affix-wrapper input {
+  color: #1f2933 !important;
+  background-color: #fff !important;
+  &::placeholder {
+    color: #6b7280 !important;
+  }
+}

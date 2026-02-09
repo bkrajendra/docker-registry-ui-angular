@@ -1,0 +1,49 @@
+@let imgName = imageName();
+@let br = branch();
+@let nImg = nImages();
+@let exp = expanded();
+@let nb = nbTags();
+
+@if (!filterResults() || nImg > 0 || (imgName && filterMatch(imgName))) {
+  @if (!showCatalogNbTags() || nb !== 0 || !imgName) {
+    <nz-card
+      class="list highlight"
+      [class.expanded]="exp"
+      (click)="onCardClick()"
+    >
+      @if (imgName) {
+        <a [routerLink]="['/taglist', imgName]" (click)="$event.stopPropagation()">
+          {{ imgName }}
+        </a>
+      }
+      @if (br) {
+        <span>
+          <span nz-icon nzType="cloud"></span>
+          {{ br.repo }}
+          <span class="item-count right">{{ nImg }} images</span>
+          <span nz-icon nzType="down" [class.rotated]="exp"></span>
+        </span>
+      }
+      @if (imgName && showCatalogNbTags() && nb !== null) {
+        <span class="item-count right">{{ nb }} tags</span>
+      }
+    </nz-card>
+  }
+
+  @if (br && (exp || filterResults())) {
+    @for (child of br.images; track $index) {
+      <div class="nested" [class.hide]="!exp && !filterResults()">
+        <app-catalog-element
+          [item]="child"
+          [filterResults]="filterResults()"
+          [registryUrl]="registryUrl()"
+          [showCatalogNbTags]="showCatalogNbTags()"
+          [catalogDefaultExpanded]="catalogDefaultExpanded()"
+          [isRegistrySecured]="isRegistrySecured()"
+          [catalogMinBranches]="catalogMinBranches()"
+          [catalogMaxBranches]="catalogMaxBranches()"
+        />
+      </div>
+    }
+  }
+}

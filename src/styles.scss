@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global theme variables (Docker Registry UI) */
+:root {
+  --primary-text: #25313b;
+  --neutral-text: #777777;
+  --background: #ffffff;
+  --hover-background: #eeeeee;
+  --accent-text: #5f7796;
+  --header-text: #ffffff;
+  --header-accent-text: #7b9ac2;
+  --header-background: #25313b;
+  --footer-text: #ffffff;
+  --footer-neutral-text: #adbacd;
+  --footer-background: #344251;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  background-color: var(--background);
+  color: var(--primary-text);
+}
+
+/* Header search: always dark text on light background so it's visible */
+.app-header .menu .search input,
+.app-header .menu .search .ant-input-affix-wrapper input,
+.app-header .menu .search .ant-input {
+  color: #1f2933 !important;
+  background-color: #fff !important;
+}
+.app-header .menu .search input::placeholder,
+.app-header .menu .search .ant-input::placeholder {
+  color: #6b7280 !important;
+}

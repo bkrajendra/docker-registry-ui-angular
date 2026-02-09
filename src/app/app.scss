@@ -1,0 +1,19 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  margin: 0.5em 0;
+  padding: 0 16px;
+}
+
+.app-breadcrumb {
+  margin-bottom: 12px;
+}
+
+.app-breadcrumb .crumb-label {
+  margin-left: 4px;
+}

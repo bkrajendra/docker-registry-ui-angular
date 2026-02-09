@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  margin: auto;
+}
+
+.catalog.header {
+  width: 100%;
+}
+
+.card-title-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+
+    .item-count {
+      font-size: 0.875rem;
+      color: var(--neutral-text, #777);
+      font-weight: normal;
+    }
+  }
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}

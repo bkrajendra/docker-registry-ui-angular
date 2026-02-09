@@ -1,0 +1,197 @@
+<nz-card class="header">
+  <div class="card-title-action">
+    <button nz-button nzType="text" routerLink="/">
+      <span nz-icon nzType="arrow-left"></span>
+    </button>
+    <h2>
+      Tags of {{ image() }}
+      <div class="source-hint">Sourced from {{ registryName() }}/{{ image() }}</div>
+      <div class="item-count">{{ tags().length }} tags</div>
+    </h2>
+  </div>
+</nz-card>
+
+@if (!loadend()) {
+  <div class="spinner-wrapper">
+    <nz-spin nzSimple></nz-spin>
+  </div>
+}
+
+@if (loadend() && numPages > 1) {
+  <nz-pagination
+    [nzPageIndex]="page()"
+    [nzTotal]="tags().length"
+    [nzPageSize]="tagsPerPage()"
+    (nzPageIndexChange)="onPageChange($event)"
+  ></nz-pagination>
+}
+
+<nz-table
+  [nzData]="paginatedTags"
+  [nzLoading]="!loadend()"
+  [nzShowPagination]="false"
+  [nzPageSize]="tagsPerPage()"
+>
+  <thead>
+    <tr>
+      <th>Tag</th>
+      <th>Pushed</th>
+      <th>Size</th>
+      @if (showContentDigest()) {
+        <th>Digest</th>
+      }
+      <th>Arch</th>
+      @if (showTagHistory()) {
+        <th>History</th>
+      }
+      @if (isImageRemoveActivated()) {
+        <th class="delete-col">
+          @if (multiDelete() && toDelete().size > 0) {
+            <button
+              nz-button
+              nzType="primary"
+              nzDanger
+              type="button"
+              (click)="openBulkDeleteConfirm()"
+              title="Delete selected images"
+            >
+              <span nz-icon nzType="delete"></span>
+              Delete selected ({{ toDelete().size }})
+            </button>
+          } @else {
+            <label nz-checkbox
+              [ngModel]="multiDelete()"
+              (ngModelChange)="onMultiDeleteModeChange($event)"
+              title="Toggle multi-delete mode. When on, select tags with checkboxes then click Delete selected."
+            >
+              Multi-delete
+            </label>
+          }
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of paginatedTags; track row.tag) {
+      <tr>
+        <td>{{ row.tag }}</td>
+        <td>
+          @if (row.creationDate) {
+            <span
+              nz-tooltip
+              [nzTooltipTitle]="row.creationDate | date: 'yyyy-MM-dd HH:mm'"
+            >
+              {{ formatRelative(row.creationDate) }}
+            </span>
+          } @else {
+            -
+          }
+        </td>
+        <td>{{ formatSize(row.size) }}</td>
+        @if (showContentDigest()) {
+          <td><code>{{ row.contentDigest ?? '-' }}</code></td>
+        }
+        <td>{{ row.arch ?? '-' }}</td>
+        @if (showTagHistory()) {
+          <td>
+            <button
+              nz-button
+              nzType="link"
+              type="button"
+              (click)="openHistoryDrawer(row)"
+            >
+              <span nz-icon nzType="history"></span>
+              History
+            </button>
+          </td>
+        }
+        @if (isImageRemoveActivated()) {
+          <td class="delete-col">
+            @if (multiDelete()) {
+              <label nz-checkbox
+                [ngModel]="isSelected(row)"
+                (ngModelChange)="onToggleSelect(row, $event)"
+                title="Select to delete"
+              >
+              </label>
+            } @else {
+              <button
+                nz-button
+                nzType="text"
+                nzDanger
+                type="button"
+                (click)="onDeleteSingle(row)"
+                title="Delete this image tag"
+              >
+                <span nz-icon nzType="delete"></span>
+              </button>
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</nz-table>
+
+@if (isImageRemoveActivated() && showConfirmModal()) {
+  <nz-modal
+    [nzVisible]="true"
+    nzTitle="Delete images"
+    (nzOnCancel)="closeConfirmModal()"
+    [nzContent]="deleteModalBodyTpl"
+    [nzFooter]="confirmModalTpl"
+    [nzClosable]="true"
+    [nzMaskClosable]="false"
+  >
+    <ng-template #deleteModalBodyTpl>
+      <p>These image tags will be deleted:</p>
+      <ul>
+        @for (img of imagesToDelete; track img.tag) {
+          <li>{{ img.name }}:{{ img.tag }}</li>
+        }
+      </ul>
+      <p class="modal-hint">
+        Run <code>registry garbage-collect config.yml</code> on your registry to reclaim storage.
+      </p>
+    </ng-template>
+    <ng-template #confirmModalTpl>
+      <button nz-button nzType="default" (click)="closeConfirmModal()">Cancel</button>
+      <button
+        nz-button
+        nzType="primary"
+        nzDanger
+        [nzLoading]="deleteInProgress()"
+        (click)="confirmDelete()"
+      >
+        Delete
+      </button>
+    </ng-template>
+  </nz-modal>
+}
+
+@if (loadend() && numPages > 1) {
+  <nz-pagination
+    [nzPageIndex]="page()"
+    [nzTotal]="tags().length"
+    [nzPageSize]="tagsPerPage()"
+    (nzPageIndexChange)="onPageChange($event)"
+  ></nz-pagination>
+}
+
+<nz-drawer
+  [nzVisible]="historyDrawerVisible()"
+  nzPlacement="right"
+  nzSize="large"
+  nzTitle="Tag history"
+  (nzOnClose)="closeHistoryDrawer()"
+>
+  <ng-template nzDrawerContent>
+    @if (historyTag()) {
+      <app-tag-history
+        [image]="image()"
+        [tag]="historyTag()!"
+        [embeddedInDrawer]="true"
+      />
+    }
+  </ng-template>
+</nz-drawer>

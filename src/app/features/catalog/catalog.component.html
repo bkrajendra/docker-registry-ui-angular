@@ -1,0 +1,27 @@
+<nz-card class="catalog header">
+  <div class="card-title-action">
+    <h2>
+      Repositories of {{ registryName() }}
+      <div class="item-count">{{ nImages() }} images in {{ nRepositories() }} repositories</div>
+    </h2>
+  </div>
+</nz-card>
+
+@if (!loadend()) {
+  <div class="spinner-wrapper">
+    <nz-spin nzSimple></nz-spin>
+  </div>
+}
+
+@for (item of filteredRepositories(); track $index) {
+  <app-catalog-element
+      [item]="item"
+      [filterResults]="filterResults()"
+      [registryUrl]="registryUrl()"
+      [showCatalogNbTags]="showCatalogNbTags()"
+      [catalogDefaultExpanded]="catalogDefaultExpanded()"
+      [isRegistrySecured]="isRegistrySecured()"
+      [catalogMinBranches]="catalogMinBranches()"
+      [catalogMaxBranches]="catalogMaxBranches()"
+    />
+}

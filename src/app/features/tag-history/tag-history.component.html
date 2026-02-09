@@ -1,0 +1,85 @@
+@if (!embeddedInDrawer()) {
+  <nz-card>
+    <div class="card-title-action">
+      <button nz-button nzType="text" [routerLink]="['/taglist', image()]">
+        <span nz-icon nzType="arrow-left"></span>
+      </button>
+      <h2>
+        <span nz-icon nzType="container"></span>
+        History of {{ image() }}:{{ tag() }}
+        <span nz-icon nzType="history"></span>
+      </h2>
+    </div>
+  </nz-card>
+} @else {
+  <div class="drawer-history-header">
+    <span nz-icon nzType="container"></span>
+    {{ image() }}:{{ tag() }}
+  </div>
+}
+
+@if (!loadend()) {
+  <div class="spinner-wrapper">
+    <nz-spin nzSimple></nz-spin>
+  </div>
+}
+
+@if (archs().length > 0) {
+  <nz-tabs (nzSelectedIndexChange)="onTabChange($event)">
+    @for (arch of archs(); track arch.digest) {
+      <nz-tab [nzTitle]="arch.title"></nz-tab>
+    }
+  </nz-tabs>
+}
+
+@if (basicDetails().length > 0) {
+  <nz-card class="history-section basic-details">
+    <h3>Basic details</h3>
+    <nz-descriptions [nzColumn]="1" nzSize="small">
+      @for (entry of basicDetails(); track entry.key) {
+        @if (entry.value !== undefined && entry.value !== null && entry.value !== '') {
+          <nz-descriptions-item [nzTitle]="entry.key">
+            @if (isArray(entry.value)) {
+              <pre>{{ entry.value | json }}</pre>
+            } @else if (isObject(entry.value)) {
+              <pre>{{ entry.value | json }}</pre>
+            } @else {
+              <span>{{ entry.value }}</span>
+            }
+          </nz-descriptions-item>
+        }
+      }
+    </nz-descriptions>
+  </nz-card>
+}
+
+@if (historyEntries().length > 0) {
+  <nz-card class="history-section history-list">
+    <h3>
+      <span nz-icon nzType="history"></span>
+      History
+    </h3>
+    <nz-timeline>
+      @for (element of historyEntries(); track $index) {
+        <nz-timeline-item>
+          <div class="history-block">
+            @for (entry of element; track entry.key) {
+              @if (entry.value !== undefined && entry.value !== null && entry.value !== '') {
+                <div class="history-row">
+                  <strong>{{ entry.key }}:</strong>
+                  @if (isArray(entry.value)) {
+                    <pre>{{ entry.value | json }}</pre>
+                  } @else if (isObject(entry.value)) {
+                    <pre>{{ entry.value | json }}</pre>
+                  } @else {
+                    <span>{{ entry.value }}</span>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </nz-timeline-item>
+      }
+    </nz-timeline>
+  </nz-card>
+}

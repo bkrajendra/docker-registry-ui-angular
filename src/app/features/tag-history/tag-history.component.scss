@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.card-title-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h2 {
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.history-section {
+  margin-top: 16px;
+}
+
+.history-list .history-block + .history-block {
+  margin-top: 12px;
+}
+
+.drawer-history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.history-row {
+  margin-bottom: 8px;
+
+  strong {
+    margin-right: 8px;
+  }
+
+  pre {
+    margin: 4px 0 0 0;
+    padding: 8px;
+    background: var(--hover-background, #eee);
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+}

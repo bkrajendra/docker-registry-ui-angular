@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+.card-title-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h2 {
+    margin: 0;
+    flex: 1;
+
+    .source-hint,
+    .item-count {
+      font-size: 0.875rem;
+      color: var(--neutral-text, #777);
+      font-weight: normal;
+    }
+  }
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+nz-pagination {
+  margin: 16px 0;
+}
+
+.delete-col {
+  white-space: nowrap;
+}
+
+.modal-hint {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--neutral-text, #777);
+}

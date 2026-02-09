@@ -1,59 +1,97 @@
-# DockerRegistryUiAngular
+# Docker Registry UI – Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.0.
+Modern UI for Docker Registry built with **Angular 21** and **ng-zorro-antd** (Ant Design).  
+This is an Angular migration of the [Riot-based Docker Registry UI](https://github.com/Joxit/docker-registry-ui).
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Browse repositories (catalog) with optional namespace branching
+- View image tags with sorting and pagination
+- Tag history (image layers/config) with multi-arch support
+- Search/filter in catalog and tag list
+- Theme support (light/dark)
+- Multi-registry URL support (add/change/remove) when not in single-registry mode
+
+## Prerequisites
+
+- Node.js 20+
+- Angular CLI 21 (`npm i -g @angular/cli@21`)
+
+## Installation
+
+```bash
+npm install
+```
+
+## Development
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open http://localhost:4200. Configure your registry (e.g. via “Change URL” in the header) or run the UI behind a proxy that forwards `/v2` to your registry.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Build
 
 ```bash
-ng generate component component-name
+ng build --configuration production
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Output: `dist/docker-registry-ui-angular/browser/`
+
+## Docker
+
+### Build and run
 
 ```bash
-ng generate --help
+docker build -t docker-registry-ui-angular .
+docker run -p 80:80 docker-registry-ui-angular
 ```
 
-## Building
+### Docker Compose (UI + Registry)
 
-To build the project run:
+Runs the UI and a Docker Registry on the same stack. The UI proxies `/v2` to the registry so there are no CORS issues.
 
 ```bash
-ng build
+docker compose up -d
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- **UI**: http://localhost  
+- **Registry**: proxied at same origin (no separate port needed for the UI to talk to the registry)
 
-## Running unit tests
+All configuration is via environment variables in `docker-compose.yml`. Key flags:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NGINX_PROXY_PASS_URL` | — | Registry URL to proxy (e.g. `http://registry-server:5000`). When set, `/v2` is proxied and the UI uses the same origin. |
+| `SINGLE_REGISTRY` | `true` | Hide the add/change/remove registry menu. |
+| `DELETE_IMAGES` | `false` | Allow deleting images from the UI. |
+| `SHOW_CONTENT_DIGEST` | `false` | Show content digest in the tag list. |
+| `SHOW_TAG_HISTORY` | `true` | Show the “History” link per tag. |
+| `SHOW_CATALOG_NB_TAGS` | `false` | Show number of tags per repo in the catalog (extra API calls). |
+| `CATALOG_ELEMENTS_LIMIT` | `1000` | Max repositories to fetch. |
+| `CATALOG_MIN_BRANCHES` / `CATALOG_MAX_BRANCHES` | `1` | Namespace branching depth. |
+| `TAGLIST_PAGE_SIZE` | `100` | Tags per page. |
+| `TAGLIST_ORDER` | `alpha-asc;num-desc` | Tag sort order. |
+| `REGISTRY_SECURED` | `false` | Set `true` if the registry uses Basic Auth. |
+| `DOCKER_REGISTRY_UI_TITLE` | `Docker Registry UI` | Title in the header. |
+| `THEME` | `auto` | `light`, `dark`, or `auto`. |
 
-```bash
-ng test
-```
+For production, run the UI on the same origin as your registry or use `NGINX_PROXY_PASS_URL` so the UI and registry share the same host.
 
-## Running end-to-end tests
+## Configuration
 
-For end-to-end (e2e) testing, run:
+When running in Docker, the entrypoint generates `config.js` from environment variables; the app reads `window.__REGISTRY_CONFIG__` on load.
 
-```bash
-ng e2e
-```
+For local development, the app uses defaults (current origin, single registry off, etc.). Optional `public/config.js` can set `window.__REGISTRY_CONFIG__` if needed.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Project structure
 
-## Additional Resources
+- `src/app/core` – models, services (registry API, cache, state, error handling)
+- `src/app/features` – catalog, tag-list, tag-history
+- `src/app/layout` – header, footer
+- `src/app/shared` – utils (format, pagination, tag order, repositories branching)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## License
+
+AGPL-3.0 (same as the original Docker Registry UI).

@@ -1,0 +1,45 @@
+<header class="app-header">
+  <a routerLink="/" class="logo">{{ title() }}</a>
+  <div class="menu">
+    <nz-input-group class="search" [nzSuffix]="suffixSearch">
+      <input
+        type="text"
+        nz-input
+        placeholder="Search Registry"
+        [ngModel]="searchValue()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </nz-input-group>
+    <ng-template #suffixSearch>
+      <span nz-icon nzType="search"></span>
+    </ng-template>
+
+    @if (showRegistryMenu()) {
+      <div nz-dropdown [nzDropdownMenu]="registryMenu">
+        <button nz-button nzType="text" class="menu-trigger">
+          <span nz-icon nzType="ellipsis"></span>
+        </button>
+      </div>
+      <nz-dropdown-menu #registryMenu="nzDropdownMenu">
+        <ul nz-menu>
+          @if (!readOnlyRegistries()) {
+            <li nz-menu-item (click)="menuAddUrl.emit()">Add URL</li>
+            <li nz-menu-item (click)="menuRemoveUrl.emit()">Remove URL</li>
+          }
+          <li nz-menu-item (click)="menuChangeUrl.emit()">Change URL</li>
+        </ul>
+      </nz-dropdown-menu>
+    }
+
+    @if (themeAuto()) {
+      <button
+        nz-button
+        nzType="text"
+        class="theme-toggle"
+        (click)="onThemeChange(!darkTheme())"
+      >
+        <span nz-icon nzType="bulb"></span>
+      </button>
+    }
+  </div>
+</header>

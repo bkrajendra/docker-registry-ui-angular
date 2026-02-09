@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+nz-card.list {
+  cursor: pointer;
+  margin-top: 8px;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+
+  .item-count {
+    font-size: 0.875rem;
+    color: var(--neutral-text, #777);
+
+    &.right {
+      float: right;
+    }
+  }
+
+  .rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.nested {
+  margin-left: 16px;
+
+  &.hide {
+    display: none;
+  }
+}

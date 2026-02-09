@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  color: var(--footer-neutral-text, #adbacd);
+  background-color: var(--footer-background, #344251);
+
+  .footer-logo {
+    color: var(--footer-text, #fff);
+    text-decoration: none;
+  }
+
+  ul {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
